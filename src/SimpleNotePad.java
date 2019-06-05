@@ -26,49 +26,49 @@ import javax.swing.text.Position;
 import javax.swing.text.StyledDocument;
 
 public class SimpleNotePad extends JFrame implements ActionListener{
-    JMenuBar mb = new JMenuBar();
-    JMenu fm = new JMenu("File");
-    JMenu em = new JMenu("Edit");
-    JTextPane d = new JTextPane();
-    JMenuItem nf = new JMenuItem("New File");
-    JMenuItem sf = new JMenuItem("Save File");
-    JMenuItem pf = new JMenuItem("Print File");
-    JMenuItem u = new JMenuItem("Undo");
-    JMenuItem c = new JMenuItem("Copy");
-    JMenuItem p = new JMenuItem("Paste");
+    JMenuBar menu = new JMenuBar();
+    JMenu fileMenu = new JMenu("File");
+    JMenu editMenu = new JMenu("Edit");
+    JTextPane text = new JTextPane();
+    JMenuItem newFile = new JMenuItem("New File");
+    JMenuItem saveFile = new JMenuItem("Save File");
+    JMenuItem printFile = new JMenuItem("Print File");
+    JMenuItem undo = new JMenuItem("Undo");
+    JMenuItem copy = new JMenuItem("Copy");
+    JMenuItem paste = new JMenuItem("Paste");
 
     public SimpleNotePad() {
         setTitle("A Simple Notepad Tool");
-        fm.add(nf);
-        fm.addSeparator();
-        fm.add(sf);
-        fm.addSeparator();
-        fm.add(pf);
-        em.add(u);
-        em.add(c);
-        em.add(p);
-        nf.addActionListener(this);
-        nf.setActionCommand("new");
-        sf.addActionListener(this);
-        sf.setActionCommand("save");
-        pf.addActionListener(this);
-        pf.setActionCommand("print");
-        c.addActionListener(this);
-
-        c.setActionCommand("copy");
-        p.addActionListener(this);
-        p.setActionCommand("paste");
-        u.addActionListener(this);
-        u.setActionCommand("undo");
-        mb.add(fm);
-        mb.add(em);
-        setJMenuBar(mb);
-        add(new JScrollPane(d));
+        fileMenu.add(newFile);
+        fileMenu.addSeparator();
+        fileMenu.add(saveFile);
+        fileMenu.addSeparator();
+        fileMenu.add(printFile);
+        editMenu.add(undo);
+        editMenu.add(copy);
+        editMenu.add(paste);
+        newFile.addActionListener(this);
+        newFile.setActionCommand("new");
+        saveFile.addActionListener(this);
+        saveFile.setActionCommand("save");
+        printFile.addActionListener(this);
+        printFile.setActionCommand("print");
+        copy.addActionListener(this);
+        copy.setActionCommand("copy");
+        paste.addActionListener(this);
+        paste.setActionCommand("paste");
+        undo.addActionListener(this);
+        undo.setActionCommand("undo");
+        menu.add(fileMenu);
+        menu.add(editMenu);
+        setJMenuBar(menu);
+        add(new JScrollPane(text));
         setPreferredSize(new Dimension(600,600));
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setVisible(true);
         pack();
     }
+
     public static void main(String[] args) {
         SimpleNotePad app = new SimpleNotePad();
     }
@@ -76,7 +76,7 @@ public class SimpleNotePad extends JFrame implements ActionListener{
     @Override
     public void actionPerformed(ActionEvent e) {
         if(e.getActionCommand().equals("new")) {
-            d.setText("");
+            text.setText("");
         }else if(e.getActionCommand().equals("save")) {
             File fileToWrite = null;
             JFileChooser fc = new JFileChooser();
@@ -85,7 +85,7 @@ public class SimpleNotePad extends JFrame implements ActionListener{
                 fileToWrite = fc.getSelectedFile();
             try {
                 PrintWriter out = new PrintWriter(new FileWriter(fileToWrite));
-                out.println(d.getText());
+                out.println(text.getText());
                 JOptionPane.showMessageDialog(null, "File is saved successfully...");
                 out.close();
             } catch (IOException ex) {
@@ -99,7 +99,7 @@ public class SimpleNotePad extends JFrame implements ActionListener{
                     public int print(Graphics pg, PageFormat pf, int pageNum) {
                         if (pageNum>0)
                             return Printable.NO_SUCH_PAGE;
-                        pg.drawString(d.getText(), 500, 500);
+                        pg.drawString(text.getText(), 500, 500);
                         paint(pg);
                         return Printable.PAGE_EXISTS;
                     }
@@ -114,12 +114,12 @@ public class SimpleNotePad extends JFrame implements ActionListener{
                         JOptionPane.ERROR_MESSAGE);
             }
         }else if(e.getActionCommand().equals("copy")) {
-            d.copy();
+            text.copy();
         }else if(e.getActionCommand().equals("paste")) {
-            StyledDocument doc = d.getStyledDocument();
+            StyledDocument doc = text.getStyledDocument();
             Position position = doc.getEndPosition();
             System.out.println("offset"+position.getOffset());
-            d.paste();
+            text.paste();
         }else if(e.getActionCommand().equals("undo")) {
 //TODO: implement undo operation
         }
