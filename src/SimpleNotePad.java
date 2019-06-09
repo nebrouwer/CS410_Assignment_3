@@ -12,8 +12,6 @@ import java.awt.print.Printable;
 import java.awt.print.PrinterException;
 import java.awt.print.PrinterJob;
 import java.io.*;
-import java.lang.reflect.Array;
-import java.util.ArrayList;
 import java.util.LinkedList;
 
 public class SimpleNotePad extends JFrame{
@@ -25,11 +23,11 @@ public class SimpleNotePad extends JFrame{
     JMenuItem saveFile = new JMenuItem("Save File");
     JMenuItem printFile = new JMenuItem("Print File");
     JMenuItem openFile = new JMenuItem("Open File");
-    JMenuItem recentFile = new JMenuItem("Recent");
+    JMenu recentFile = new JMenu("Recent");
     JMenuItem replace = new JMenuItem("Replace");
     JMenuItem copy = new JMenuItem("Copy");
     JMenuItem paste = new JMenuItem("Paste");
-    ArrayList<File> recents = new ArrayList<>();
+    LinkedList<File> recents = new LinkedList<>();
 
     public SimpleNotePad()
     {
@@ -80,13 +78,33 @@ public class SimpleNotePad extends JFrame{
         File fileToOpen = null;
         JFileChooser file = new JFileChooser();
         int result = file.showOpenDialog(null);
-        if (result == JFileChooser.APPROVE_OPTION)
+        if (result == JFileChooser.APPROVE_OPTION) {
             fileToOpen = file.getSelectedFile();
+        }
+        open(fileToOpen);
+    }
+
+    private void open(File file){
+        updateRecent(file);
         try {
-            BufferedReader input = new BufferedReader(new InputStreamReader(new FileInputStream(fileToOpen)));
+            BufferedReader input = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
             text.read(input, "Opening...");
             input.close();
         } catch (IOException ex) {
+        }
+    }
+
+    private void updateRecent(File file){
+        if(recents.contains(file)){
+            recents.remove(file);
+        }
+        recents.addFirst(file);
+        recentFile.removeAll();
+        for(File f : recents){
+            JMenuItem r = new JMenuItem(f.getName());
+            r.addActionListener(this :: actionRecent);
+            r.setActionCommand(f.getAbsolutePath());
+            recentFile.add(r);
         }
     }
 
@@ -95,8 +113,8 @@ public class SimpleNotePad extends JFrame{
         text.replaceSelection(replaceText.showInputDialog("Enter or paste text to insert: "));
     }
 
-    private void actionRecent(){
-
+    private void actionRecent(ActionEvent e){
+        open(new File(e.getActionCommand()));
     }
 
     private void actionNew(ActionEvent e){
@@ -151,7 +169,11 @@ public class SimpleNotePad extends JFrame{
             JOptionPane.showMessageDialog(null, "File is saved successfully...");
             out.close();
         } catch (IOException ex) {
+            JOptionPane.showMessageDialog(null,
+                    "Save failed" + ex, "Save error",
+                    JOptionPane.ERROR_MESSAGE);
         }
+        updateRecent(fileToWrite);
     }
 
     /*@Override
