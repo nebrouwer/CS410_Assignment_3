@@ -3,8 +3,6 @@
 // Assignment 3
 
 import javax.swing.*;
-import javax.swing.text.Position;
-import javax.swing.text.StyledDocument;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.print.PageFormat;
@@ -33,30 +31,20 @@ public class SimpleNotePad extends JFrame{
     {
         setTitle("A Simple Notepad Tool");
         fileMenu.add(newFile);
-        fileMenu.addSeparator();
         fileMenu.add(openFile);
-        fileMenu.addSeparator();
         fileMenu.add(saveFile);
-        fileMenu.addSeparator();
         fileMenu.add(printFile);
-        fileMenu.addSeparator();
         fileMenu.add(recentFile);
-        //recentFile.add(recent);
 
         editMenu.add(copy);
         editMenu.add(paste);
         editMenu.add(replace);
 
         newFile.addActionListener(this::actionNew);
-        //actionNew.setActionCommand("new");
         saveFile.addActionListener(this::actionSave);
-        //actionSave.setActionCommand("save");
         printFile.addActionListener(this::actionPrint);
-        //actionPrint.setActionCommand("print");
         copy.addActionListener(this::actionCopy);
-        //actionCopy.setActionCommand("copy");
         paste.addActionListener(this::actionPaste);
-        //actionPaste.setActionCommand("paste");
         openFile.addActionListener(this::actionOpen);
         replace.addActionListener(this::actionReplace);
 
@@ -74,6 +62,12 @@ public class SimpleNotePad extends JFrame{
         SimpleNotePad app = new SimpleNotePad();
     }
 
+    // ActionEvent method for New File function
+    private void actionNew(ActionEvent e){
+        text.setText("");
+    }
+
+    // ActionEvent method for Open File function
     private void actionOpen(ActionEvent e){
         File fileToOpen = null;
         JFileChooser file = new JFileChooser();
@@ -84,6 +78,7 @@ public class SimpleNotePad extends JFrame{
         open(fileToOpen);
     }
 
+    // Method for opening files
     private void open(File file){
         updateRecent(file);
         try {
@@ -94,44 +89,27 @@ public class SimpleNotePad extends JFrame{
         }
     }
 
-    private void updateRecent(File file){
-        if(recents.contains(file)){
-            recents.remove(file);
+    // ActionEvent method for Save File function
+    private void actionSave(ActionEvent e) {
+        File fileToWrite = null;
+        JFileChooser fc = new JFileChooser();
+        int returnVal = fc.showSaveDialog(null);
+        if (returnVal == JFileChooser.APPROVE_OPTION)
+            fileToWrite = fc.getSelectedFile();
+        try {
+            PrintWriter out = new PrintWriter(new FileWriter(fileToWrite));
+            out.println(text.getText());
+            JOptionPane.showMessageDialog(null, "File is saved successfully...");
+            out.close();
+        } catch (IOException ex) {
+            JOptionPane.showMessageDialog(null,
+                    "Save failed" + ex, "Save error",
+                    JOptionPane.ERROR_MESSAGE);
         }
-        recents.addFirst(file);
-        recentFile.removeAll();
-        for(File f : recents){
-            JMenuItem r = new JMenuItem(f.getName());
-            r.addActionListener(this :: actionRecent);
-            r.setActionCommand(f.getAbsolutePath());
-            recentFile.add(r);
-        }
+        updateRecent(fileToWrite);
     }
 
-    private void actionReplace(ActionEvent e){
-        JOptionPane replaceText = new JOptionPane();
-        text.replaceSelection(replaceText.showInputDialog("Enter or paste text to insert: "));
-    }
-
-    private void actionRecent(ActionEvent e){
-        open(new File(e.getActionCommand()));
-    }
-
-    private void actionNew(ActionEvent e){
-        text.setText("");
-    }
-
-    private void actionPaste(ActionEvent e) {
-        StyledDocument doc = text.getStyledDocument();
-        Position position = doc.getEndPosition();
-        System.out.println("offset"+position.getOffset());
-        text.paste();
-    }
-
-    private void actionCopy(ActionEvent e) {
-        text.copy();
-    }
-
+    // ActionEvent method for Print File function
     private void actionPrint(ActionEvent e) {
         try{
             PrinterJob pjob = PrinterJob.getPrinterJob();
@@ -157,72 +135,46 @@ public class SimpleNotePad extends JFrame{
         }
     }
 
-    private void actionSave(ActionEvent e) {
-        File fileToWrite = null;
-        JFileChooser fc = new JFileChooser();
-        int returnVal = fc.showSaveDialog(null);
-        if (returnVal == JFileChooser.APPROVE_OPTION)
-            fileToWrite = fc.getSelectedFile();
-        try {
-            PrintWriter out = new PrintWriter(new FileWriter(fileToWrite));
-            out.println(text.getText());
-            JOptionPane.showMessageDialog(null, "File is saved successfully...");
-            out.close();
-        } catch (IOException ex) {
-            JOptionPane.showMessageDialog(null,
-                    "Save failed" + ex, "Save error",
-                    JOptionPane.ERROR_MESSAGE);
+    // Method to update the the file list of the Recent function
+    private void updateRecent(File file){
+        if(recents.contains(file)){
+            recents.remove(file);
         }
-        updateRecent(fileToWrite);
+        if(recents.size() == 5){
+            recents.removeLast();
+            recents.addFirst(file);
+        }else{
+            recents.addFirst(file);
+        }
+        recentFile.removeAll();
+        for(File f : recents){
+            JMenuItem r = new JMenuItem(f.getName());
+            r.addActionListener(this :: actionRecent);
+            r.setActionCommand(f.getAbsolutePath());
+            recentFile.add(r);
+        }
     }
 
-    /*@Override
-    public void actionPerformed(ActionEvent e) {
-        if(e.getActionCommand().equals("new")) {
-            text.setText("");
-        }else if(e.getActionCommand().equals("save")) {
-            File fileToWrite = null;
-            JFileChooser fc = new JFileChooser();
-            int returnVal = fc.showSaveDialog(null);
-            if (returnVal == JFileChooser.APPROVE_OPTION)
-                fileToWrite = fc.getSelectedFile();
-            try {
-                PrintWriter out = new PrintWriter(new FileWriter(fileToWrite));
-                out.println(text.getText());
-                JOptionPane.showMessageDialog(null, "File is saved successfully...");
-                out.close();
-            } catch (IOException ex) {
-            }
-        }else if(e.getActionCommand().equals("print")) {
-            try{
-                PrinterJob pjob = PrinterJob.getPrinterJob();
-                pjob.setJobName("Sample Command Pattern");
-                pjob.setCopies(1);
-                pjob.setPrintable(new Printable() {
-                    public int print(Graphics pg, PageFormat pf, int pageNum) {
-                        if (pageNum>0)
-                            return Printable.NO_SUCH_PAGE;
-                        pg.drawString(text.getText(), 500, 500);
-                        paint(pg);
-                        return Printable.PAGE_EXISTS;
-                    }
-                });
+    // ActionEvent method for Recent function
+    private void actionRecent(ActionEvent e){
+        open(new File(e.getActionCommand()));
+    }
 
-                if (pjob.printDialog() == false)
-                    return;
-                pjob.print();
-            } catch (PrinterException pe) {
-                JOptionPane.showMessageDialog(null,
-                        "Printer error" + pe, "Printing error",
-                        JOptionPane.ERROR_MESSAGE);
-            }
-        }else if(e.getActionCommand().equals("copy")) {
-            text.copy();
-        }else if(e.getActionCommand().equals("paste")) {
-            StyledDocument doc = text.getStyledDocument();
-            Position position = doc.getEndPosition();
-            System.out.println("offset"+position.getOffset());
-            text.paste();
+    // ActionEvent method for Copy function
+    private void actionCopy(ActionEvent e) {
+        text.copy();
+    }
+
+    // ActionEvent method for Paste function
+    private void actionPaste(ActionEvent e) {
+        text.paste();
+    }
+
+    // ActionEvent method for Replace function
+    private void actionReplace(ActionEvent e){
+        String userInput = JOptionPane.showInputDialog("Enter or paste text to replace selection:");
+        if(userInput != null) {
+            text.replaceSelection(userInput);
         }
-    }*/
+    }
 }
