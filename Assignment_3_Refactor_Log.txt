@@ -12,3 +12,4 @@ Refactor Log
 6. Added functionality to "catch" statement in actionSave to actually display a message if there is an IOException.
 7. Added "Open", "Replace", and "Recent" functionality.
 8. Removed unnecessary console print statement and related code in actionPaste.
+9. Re-arranged code into three different classes. Actions in one, GUI in another, and Main in the original class.
